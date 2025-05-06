@@ -29,7 +29,7 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private EmailServiceImpl emailService;  
+    private EmailServiceImpl emailService;     
 
     @Autowired
     private UserOtpRepository otpRepository;
