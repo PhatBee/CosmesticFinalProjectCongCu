@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
     public LoginResponse authenticate(LoginRequest loginRequest) {
         Optional<User> userOptional = userRepositoty.findByUsername(loginRequest.getUsername());
 
-        if (!userOptional.isPresent()) {
+        if (userOptional.isEmpty()) {
             return new LoginResponse(false, "User not found", null);
         }
 
