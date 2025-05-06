@@ -1,4 +1,4 @@
-package com.nhomba.cosmesticbackendcongcu;
+package com.phatbee.cosmeticshopbackend.Config;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

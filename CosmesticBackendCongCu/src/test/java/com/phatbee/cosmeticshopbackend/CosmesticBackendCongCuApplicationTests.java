@@ -1,4 +1,4 @@
-package com.nhomba.cosmesticbackendcongcu;
+package com.phatbee.cosmeticshopbackend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,4 +1,4 @@
-package com.nhomba.cosmesticbackendcongcu.Entity;
+package com.phatbee.cosmeticshopbackend.Entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;

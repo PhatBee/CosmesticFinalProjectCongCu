@@ -1,0 +1,281 @@
+package com.phatbee.cosmeticshopbackend.Service.Impl;
+
+import com.phatbee.cosmeticshopbackend.Config.OTPGenerator;
+import com.phatbee.cosmeticshopbackend.Entity.User;
+import com.phatbee.cosmeticshopbackend.Entity.UserOtp;
+import com.phatbee.cosmeticshopbackend.Repository.UserOtpRepository;
+import com.phatbee.cosmeticshopbackend.Repository.UserRepositoty;
+import com.phatbee.cosmeticshopbackend.Service.UserService;
+import com.phatbee.cosmeticshopbackend.dto.OtpVerificationRequest;
+import com.phatbee.cosmeticshopbackend.dto.PasswordResetResponse;
+import com.phatbee.cosmeticshopbackend.dto.ResetPasswordRequest;
+import jakarta.validation.ValidationException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.Optional;
+import java.util.Random;
+
+@Service
+public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserRepositoty userRepositoty;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailServiceImpl emailService;
+
+    @Autowired
+    private UserOtpRepository otpRepository;
+
+    private static final int MAX_ATTEMPTS = 3;
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+
+    @Override
+    public boolean authenticate(String username, String password) {
+        return userRepositoty.findByUsername(username)
+                .map(user -> passwordEncoder.matches(password, user .getPassword()) && user.isActivated())
+                .orElse(false);
+    }
+
+    @Override
+    public String registerUser(String username, String email, String password, String fullName, Date birthday, String gender, String phone, String imageUrl) {
+        if (userRepositoty.findByEmail(email).isPresent()) {
+            throw new RuntimeException("Email already registered");
+        }
+        if (userRepositoty.findByUsername(username).isPresent()) {
+            throw new RuntimeException("Username already registered");
+        }
+        String otp = OTPGenerator.generateOTP();
+        emailService.sendOtp(email, otp);
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFullName(fullName);
+        user.setGender(gender);
+        user.setPhone(phone);
+        user.setImage(imageUrl);
+        user.setOtp(otp);
+        user.setOtpGeneratedAt(LocalDateTime.now());
+        userRepositoty.save(user);
+
+        return "Registration successful. Please check your email for the OTP.";
+    }
+
+    @Override
+    public String activateAccount(String email, String otp) {
+        User user = userRepositoty.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid Exception, No user found"));
+
+        if (user.isActivated()){
+            throw new RuntimeException("User is already activated");
+        }
+
+        if (!otp.equals(user.getOtp())) {
+            user.setFailedAttempts(user.getFailedAttempts() + 1);
+            userRepositoty.save(user);
+
+            if (user.getFailedAttempts() >= MAX_ATTEMPTS) {
+                userRepositoty.delete(user);
+                throw new RuntimeException("Too many attempts, Account registration has been canceled");
+            }
+            throw new RuntimeException("Invalid OTP. Please try again");
+        }
+
+        user.setActivated(true);
+        user.setOtp(null);
+        user.setFailedAttempts(0);
+        userRepositoty.save(user);
+        return "Activated successful";
+    }
+
+    @Override
+    public String resendOtp1(String email) {
+        User user = userRepositoty.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (user.isActivated()) {
+            throw new RuntimeException("Account is already activated");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getOtpGeneratedAt() != null && user.getOtpGeneratedAt().plusSeconds(30).isAfter(now)) {
+            throw new RuntimeException("Please wait 30 seconds before requesting a new OTP");
+        }
+
+        String newOtp = OTPGenerator.generateOTP();
+        user.setOtp(newOtp);
+        user.setOtpGeneratedAt(now);
+        userRepositoty.save(user);
+
+        emailService.sendOtp(user.getEmail(), newOtp);
+        return "A new OTP has been sent to your email.";
+    }
+
+    @Override
+    public String sendOtpForPasswordReset(String email) {
+        User user = userRepositoty.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (!user.isActivated()) {
+            throw new RuntimeException("User is not activated, Please contact administrator");
+        }
+
+        String otp = OTPGenerator.generateOTP();
+        emailService.sendOtp(email, otp);
+        user.setOtp(otp);
+        user.setOtpGeneratedAt(LocalDateTime.now());
+        userRepositoty.save(user);
+        return "A new OTP has been sent to your email.";
+
+    }
+
+    @Override
+    public String resetPassword(String email, String otp, String newPassword) {
+        User user = userRepositoty.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Invalid Exception, No user found"));
+
+        if (user.getOtp() == null || !user.getOtp().equals(otp)) {
+            throw new RuntimeException("Invalid OTP. Please try again");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        if (user.getOtpGeneratedAt() != null && user.getOtpGeneratedAt().plusSeconds(30).isAfter(now)) {
+            throw new RuntimeException("Please wait 30 seconds before requesting a new OTP");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setOtp(null);
+        userRepositoty.save(user);
+
+        return "Password reset successful";
+    }
+    @Override
+    public PasswordResetResponse requestPasswordReset(String email) {
+        // Check if user with email exists
+        Optional<User> userOptional = userRepositoty.findByEmail(email);
+        if (!userOptional.isPresent()) {
+            // For security reasons, don't reveal that email doesn't exist
+            return new PasswordResetResponse(true, "If your email is registered, you will receive a password reset code");
+        }
+
+        // Generate OTP
+        String otp = generateOtp();
+
+        // Save OTP
+        UserOtp passwordResetOtp = otpRepository.findByEmail(email).orElse(new UserOtp());
+        passwordResetOtp.setEmail(email);
+        passwordResetOtp.setOtp(otp);
+        passwordResetOtp.setExpiryTime(LocalDateTime.now().plusMinutes(10)); // OTP valid for 10 minutes
+        otpRepository.save(passwordResetOtp);
+
+        // Send OTP via email
+        emailService.sendPasswordResetOtp(email, otp);
+
+        return new PasswordResetResponse(true, "Password reset code sent to your email");
+    }
+
+    private String generateOtp() {
+        // Generate 6-digit OTP
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000);
+        return String.valueOf(otp);
+    }
+
+    @Override
+    public PasswordResetResponse resetPassword(ResetPasswordRequest request) {
+        // Validate request
+        if (request.getEmail() == null || request.getOtp() == null || request.getNewPassword() == null) {
+            return new PasswordResetResponse(false, "Invalid request");
+        }
+
+        // Check if OTP exists
+        Optional<UserOtp> otpOptional = otpRepository.findByEmail(request.getEmail());
+        if (!otpOptional.isPresent()) {
+            return new PasswordResetResponse(false, "Invalid or expired reset code");
+        }
+
+        UserOtp passwordResetOtp = otpOptional.get();
+
+        // Check if OTP is expired
+        if (LocalDateTime.now().isAfter(passwordResetOtp.getExpiryTime())) {
+            otpRepository.delete(passwordResetOtp);
+            return new PasswordResetResponse(false, "Reset code has expired. Please request a new one.");
+        }
+
+        // Verify OTP
+        if (!passwordResetOtp.getOtp().equals(request.getOtp())) {
+            return new PasswordResetResponse(false, "Invalid reset code");
+        }
+
+        // Find user
+        Optional<User> userOptional = userRepositoty.findByEmail(request.getEmail());
+        if (!userOptional.isPresent()) {
+            return new PasswordResetResponse(false, "User not found");
+        }
+
+        User user = userOptional.get();
+
+        // Validate new password
+        if (request.getNewPassword().length() < 6) {
+            return new PasswordResetResponse(false, "Password must be at least 6 characters");
+        }
+
+        // Update password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepositoty.save(user);
+
+        // Delete OTP entry
+        otpRepository.delete(passwordResetOtp);
+
+        return new PasswordResetResponse(true, "Password has been reset successfully");
+    }
+
+    @Override
+    public PasswordResetResponse resendOtpPasswordReset(String email) {
+        // Check if user with email exists
+        Optional<User> userOptional = userRepositoty.findByEmail(email);
+        if (!userOptional.isPresent()) {
+            // For security reasons, don't reveal that email doesn't exist
+            return new PasswordResetResponse(true, "If your email is registered, you will receive a password reset code");
+        }
+
+        // Check if existing OTP request exists
+        Optional<UserOtp> otpOptional = otpRepository.findByEmail(email);
+        if (!otpOptional.isPresent()) {
+            return new PasswordResetResponse(false, "No password reset request found for this email");
+        }
+
+        // Generate new OTP
+        String newOtp = generateOtp();
+
+        // Update OTP
+        UserOtp passwordResetOtp = otpOptional.get();
+        passwordResetOtp.setOtp(newOtp);
+        passwordResetOtp.setExpiryTime(LocalDateTime.now().plusMinutes(10));
+        otpRepository.save(passwordResetOtp);
+
+        // Send new OTP via email
+        emailService.sendPasswordResetOtp(email, newOtp);
+
+        return new PasswordResetResponse(true, "New password reset code sent to your email");
+
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return userRepositoty.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    private boolean isValidGender(String gender) {
+        return gender != null && (gender.equals("MALE") || gender.equals("FEMALE") || gender.equals("OTHER"));
+    }
+}
