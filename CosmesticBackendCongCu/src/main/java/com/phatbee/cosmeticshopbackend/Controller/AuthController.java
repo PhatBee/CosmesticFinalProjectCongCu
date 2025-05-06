@@ -56,4 +56,10 @@ public class AuthController {
         PasswordResetResponse response = userService.resendOtpPasswordReset(email);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<RegistrationResponse> register(@RequestBody RegistrationRequest request) {
+        RegistrationResponse response = userService.register(request);
+        return ResponseEntity.ok(response);
+    }
 }
