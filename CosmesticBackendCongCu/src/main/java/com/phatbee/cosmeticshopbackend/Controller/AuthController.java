@@ -17,6 +17,15 @@ public class AuthController {
     @Autowired
     UserServiceImpl userService;
 
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest loginRequest) {
+        LoginResponse response = userService.authenticate(loginRequest);
+        if (response.isSuccess()) {
+            return ResponseEntity.ok(response);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
+    }
 
     @PostMapping("/verify-otp")
     public ResponseEntity<RegistrationResponse> verifyOtp(@RequestBody OtpVerificationRequest request) {
