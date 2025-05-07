@@ -160,7 +160,7 @@ public class UserServiceImpl implements UserService {
     public LoginResponse authenticate(LoginRequest loginRequest) {
         Optional<User> userOptional = userRepositoty.findByUsername(loginRequest.getUsername());
 
-        if (userOptional.isEmpty()) {
+        if (!userOptional.isPresent()) {
             return new LoginResponse(false, "User not found", null);
         }
 
@@ -211,6 +211,7 @@ public class UserServiceImpl implements UserService {
         emailService.sendOtpEmail(request.getEmail(), otp);
 
         return new RegistrationResponse(true, "OTP sent to your email for verification");
+
     }
 
     @Override
