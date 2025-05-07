@@ -1,4 +1,4 @@
-package com.example.cosmesticappcongcu.model;
+package  com.example.cosmesticappcongcu.model;
 
 public class ForgotPasswordRequest {
     private String email;

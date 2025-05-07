@@ -1,4 +1,7 @@
-package com.example.cosmesticappcongcu.model;
+package  com.example.cosmesticappcongcu.model;
+
+import java.time.LocalDate;
+import java.util.Date;
 
 public class User {
     private Long userId;

@@ -1,6 +1,10 @@
-package com.example.cosmesticappcongcu.activity;
+package  com.example.cosmesticappcongcu.activity;
 
+import static androidx.core.util.TypedValueCompat.dpToPx;
+
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -9,17 +13,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.cosmesticappcongcu.R;
-import com.example.cosmesticappcongcu.adapter.BannerAdapter;
-import com.example.cosmesticappcongcu.model.Banner;
-import com.example.cosmesticappcongcu.model.Category;
-import com.example.cosmesticappcongcu.retrofit.ApiService;
-import com.example.cosmesticappcongcu.retrofit.RetrofitClient;
 import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
 
 import org.json.JSONObject;
@@ -30,8 +30,15 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import  com.example.cosmesticappcongcu.R;
+import  com.example.cosmesticappcongcu.adapter.BannerAdapter;
+import  com.example.cosmesticappcongcu.adapter.CategoryAdapter;
+import  com.example.cosmesticappcongcu.model.Banner;
+import  com.example.cosmesticappcongcu.model.Category;
+import  com.example.cosmesticappcongcu.retrofit.ApiService;
+import  com.example.cosmesticappcongcu.retrofit.RetrofitClient;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements CategoryAdapter.OnCategoryClickListener {
     private TextView tvUsername;
     private SharedPreferences sharedPreferences;
     private ViewPager2 viewPagerSlider;
@@ -44,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
     private RecyclerView rvCategories;
     private ProgressBar progressBarCategory;
-    // private CategoryAdapter categoryAdapter;
+    private CategoryAdapter categoryAdapter;
     private ImageView ivGioHang;
     private ImageView ivProfile;
 
@@ -76,39 +83,97 @@ public class MainActivity extends AppCompatActivity {
         loadBanners();
 
         // Auto-scroll feature
-       setupAutoScroll();
+        setupAutoScroll();
 
+        // Setup RecyclerView
+        setupRecyclerView();
+
+        // Load categories
+        loadCategories();
 
         // Update username from SharedPreferences
         sharedPreferences = getSharedPreferences("UserSession", MODE_PRIVATE);
         String username = sharedPreferences.getString("username", "");
         tvUsername.setText(username);
 
-//        ivGioHang.setOnClickListener( v -> {
-//            Intent intent = new Intent(MainActivity.this, CartActivity.class);
-//            startActivity(intent);
-//        });
-//
-//        ivProfile.setOnClickListener( v -> {
-//            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
-//            startActivity(intent);
-//        });
+        ivGioHang.setOnClickListener( v -> {
+            Intent intent = new Intent(MainActivity.this, CartActivity.class);
+            startActivity(intent);
+        });
+
+        ivProfile.setOnClickListener( v -> {
+            Intent intent = new Intent(MainActivity.this, ProfileActivity.class);
+            startActivity(intent);
+        });
 
     }
 
-//    private void setupRecyclerView() {
-//        categoryAdapter = new CategoryAdapter(this, this);
-//
-//        // Use GridLayoutManager for grid display (typically for categories)
-//        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-//        rvCategories.setLayoutManager(layoutManager);
-//        rvCategories.setAdapter(categoryAdapter);
-//
-////        // Add item decoration for spacing if needed
-////        rvCategories.addItemDecoration(new GridSpacingItemDecoration(1,
-////                dpToPx(16), true));
-//    }
+    private void setupRecyclerView() {
+        categoryAdapter = new CategoryAdapter(this, this);
 
+        // Use GridLayoutManager for grid display (typically for categories)
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        rvCategories.setLayoutManager(layoutManager);
+        rvCategories.setAdapter(categoryAdapter);
+
+//        // Add item decoration for spacing if needed
+//        rvCategories.addItemDecoration(new GridSpacingItemDecoration(1,
+//                dpToPx(16), true));
+    }
+
+    private void loadCategories() {
+        progressBarCategory.setVisibility(View.VISIBLE);
+
+        // Make API call
+        Call<List<Category>> call = RetrofitClient.getClient().create(ApiService.class).getCategories();
+        call.enqueue(new Callback<List<Category>>() {
+            @Override
+            public void onResponse(Call<List<Category>> call, Response<List<Category>> response) {
+                // Hide progress bar
+                progressBarCategory.setVisibility(View.GONE);
+
+                if (response.isSuccessful() && response.body() != null) {
+                    // Update adapter with fetched categories
+                    categoryAdapter.setCategories(response.body());
+                } else {
+                    // Handle error response
+                    try {
+                        if (response.errorBody() != null) {
+                            JSONObject errorObject = new JSONObject(response.errorBody().string());
+                            Toast.makeText(MainActivity.this, errorObject.getString("message"),
+                                    Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Failed to load categories",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, "Error: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Category>> call, Throwable t) {
+                // Hide progress bar
+                progressBarCategory.setVisibility(View.GONE);
+
+                // Show error message
+                Toast.makeText(MainActivity.this, "Network error: " + t.getMessage(),
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @Override
+    public void onCategoryClick(Category category) {
+        // Handle category click
+        // For example, navigate to products list filtered by this category
+        Intent intent = new Intent(MainActivity.this, ProductListActivity.class);
+        intent.putExtra("CATEGORY_ID", category.getCategoryId());
+        intent.putExtra("CATEGORY_NAME", category.getCategoryName());
+        startActivity(intent);
+    }
 
     private void loadBanners() {
         progressBarBanner.setVisibility(View.VISIBLE);
@@ -198,4 +263,44 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Utility method to convert dp to pixels
+    private int dpToPx(int dp) {
+        return (int) (dp * getResources().getDisplayMetrics().density);
+    }
+
+    // Utility class for adding spacing between grid items
+    public class GridSpacingItemDecoration extends RecyclerView.ItemDecoration {
+        private int spanCount;
+        private int spacing;
+        private boolean includeEdge;
+
+        public GridSpacingItemDecoration(int spanCount, int spacing, boolean includeEdge) {
+            this.spanCount = spanCount;
+            this.spacing = spacing;
+            this.includeEdge = includeEdge;
+        }
+
+        @Override
+        public void getItemOffsets(@NonNull Rect outRect, @NonNull View view,
+                                   @NonNull RecyclerView parent, @NonNull RecyclerView.State state) {
+            int position = parent.getChildAdapterPosition(view);
+            int column = position % spanCount;
+
+            if (includeEdge) {
+                outRect.left = spacing - column * spacing / spanCount;
+                outRect.right = (column + 1) * spacing / spanCount;
+
+                if (position < spanCount) {
+                    outRect.top = spacing;
+                }
+                outRect.bottom = spacing;
+            } else {
+                outRect.left = column * spacing / spanCount;
+                outRect.right = spacing - (column + 1) * spacing / spanCount;
+                if (position >= spanCount) {
+                    outRect.top = spacing;
+                }
+            }
+        }
+    }
 }

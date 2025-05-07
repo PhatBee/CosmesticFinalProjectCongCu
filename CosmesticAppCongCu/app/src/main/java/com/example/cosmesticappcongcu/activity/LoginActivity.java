@@ -1,4 +1,4 @@
-package com.example.cosmesticappcongcu.activity;
+package  com.example.cosmesticappcongcu.activity;
 
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -20,12 +20,12 @@ import org.json.JSONObject;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import com.example.cosmesticappcongcu.R;
-import com.example.cosmesticappcongcu.manager.UserSessionManager;
-import com.example.cosmesticappcongcu.model.LoginRequest;
-import com.example.cosmesticappcongcu.model.LoginResponse;
-import com.example.cosmesticappcongcu.retrofit.ApiService;
-import com.example.cosmesticappcongcu.retrofit.RetrofitClient;
+import  com.example.cosmesticappcongcu.R;
+import  com.example.cosmesticappcongcu.manager.UserSessionManager;
+import  com.example.cosmesticappcongcu.model.LoginRequest;
+import  com.example.cosmesticappcongcu.model.LoginResponse;
+import  com.example.cosmesticappcongcu.retrofit.ApiService;
+import  com.example.cosmesticappcongcu.retrofit.RetrofitClient;
 
 public class LoginActivity extends AppCompatActivity {
     private TextInputEditText editTextUsername, editTextPassword;
@@ -89,13 +89,13 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         textViewRegister.setOnClickListener(v -> {
-//            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-//            startActivity(intent);
+            Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
+            startActivity(intent);
         });
 
         textViewForgotPassword.setOnClickListener(v -> {
-//            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
-//            startActivity(intent);
+            Intent intent = new Intent(LoginActivity.this, ForgotPasswordActivity.class);
+            startActivity(intent);
         });
 
     }

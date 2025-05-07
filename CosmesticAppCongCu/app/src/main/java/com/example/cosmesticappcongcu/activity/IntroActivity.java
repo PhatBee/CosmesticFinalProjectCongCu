@@ -1,4 +1,4 @@
-package com.example.cosmesticappcongcu.activity;
+package  com.example.cosmesticappcongcu.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,8 +6,8 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.cosmesticappcongcu.R;
-import com.example.cosmesticappcongcu.databinding.ActivityIntroBinding;
+import  com.example.cosmesticappcongcu.R;
+import  com.example.cosmesticappcongcu.databinding.ActivityIntroBinding;
 
 
 public class IntroActivity extends AppCompatActivity {

@@ -1,7 +1,6 @@
-package com.example.cosmesticappcongcu.model;
+package  com.example.cosmesticappcongcu.model;
 
 import com.google.gson.annotations.SerializedName;
-
 import java.util.Set;
 
 public class Cart {

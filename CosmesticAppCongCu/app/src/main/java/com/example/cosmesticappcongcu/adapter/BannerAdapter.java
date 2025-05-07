@@ -1,4 +1,4 @@
-package com.example.cosmesticappcongcu.adapter;
+package  com.example.cosmesticappcongcu.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,10 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.cosmesticappcongcu.R;
-import com.example.cosmesticappcongcu.model.Banner;
 
 import java.util.List;
+
+import  com.example.cosmesticappcongcu.R;
+import  com.example.cosmesticappcongcu.model.Banner;
 
 public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.BannerViewHolder> {
     private Context context;

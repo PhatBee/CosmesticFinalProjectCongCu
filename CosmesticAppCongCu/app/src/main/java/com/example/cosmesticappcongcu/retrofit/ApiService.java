@@ -1,21 +1,4 @@
-package com.example.cosmesticappcongcu.retrofit;
-
-import com.example.cosmesticappcongcu.model.Banner;
-import com.example.cosmesticappcongcu.model.Cart;
-import com.example.cosmesticappcongcu.model.CartItemRequest;
-import com.example.cosmesticappcongcu.model.Category;
-import com.example.cosmesticappcongcu.model.ForgotPasswordRequest;
-import com.example.cosmesticappcongcu.model.LoginRequest;
-import com.example.cosmesticappcongcu.model.LoginResponse;
-import com.example.cosmesticappcongcu.model.OtpVerificationRequest;
-import com.example.cosmesticappcongcu.model.PasswordResetResponse;
-import com.example.cosmesticappcongcu.model.Product;
-import com.example.cosmesticappcongcu.model.RegistrationRequest;
-import com.example.cosmesticappcongcu.model.RegistrationResponse;
-import com.example.cosmesticappcongcu.model.ResetPasswordRequest;
-import com.example.cosmesticappcongcu.model.User;
-import com.example.cosmesticappcongcu.model.UserUpdateDTO;
-import com.example.cosmesticappcongcu.model.UserUpdateResponse;
+package  com.example.cosmesticappcongcu.retrofit;
 
 import java.util.List;
 
@@ -27,6 +10,22 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
+import  com.example.cosmesticappcongcu.model.Banner;
+import  com.example.cosmesticappcongcu.model.Cart;
+import  com.example.cosmesticappcongcu.model.CartItemRequest;
+import  com.example.cosmesticappcongcu.model.Category;
+import  com.example.cosmesticappcongcu.model.ForgotPasswordRequest;
+import  com.example.cosmesticappcongcu.model.LoginRequest;
+import  com.example.cosmesticappcongcu.model.LoginResponse;
+import  com.example.cosmesticappcongcu.model.OtpVerificationRequest;
+import  com.example.cosmesticappcongcu.model.PasswordResetResponse;
+import  com.example.cosmesticappcongcu.model.Product;
+import  com.example.cosmesticappcongcu.model.RegistrationRequest;
+import  com.example.cosmesticappcongcu.model.RegistrationResponse;
+import  com.example.cosmesticappcongcu.model.ResetPasswordRequest;
+import  com.example.cosmesticappcongcu.model.User;
+import  com.example.cosmesticappcongcu.model.UserUpdateDTO;
+import  com.example.cosmesticappcongcu.model.UserUpdateResponse;
 
 public interface ApiService {
     @GET("api/banners")

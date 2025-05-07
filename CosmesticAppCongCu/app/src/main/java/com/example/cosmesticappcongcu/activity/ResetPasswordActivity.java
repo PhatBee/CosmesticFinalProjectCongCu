@@ -1,4 +1,4 @@
-package com.example.cosmesticappcongcu.activity;
+package  com.example.cosmesticappcongcu.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,20 +13,24 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
-
-import com.example.cosmesticappcongcu.R;
-import com.example.cosmesticappcongcu.model.PasswordResetResponse;
-import com.example.cosmesticappcongcu.model.ResetPasswordRequest;
-import com.example.cosmesticappcongcu.retrofit.ApiService;
-import com.example.cosmesticappcongcu.retrofit.RetrofitClient;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import  com.example.cosmesticappcongcu.R;
+import  com.example.cosmesticappcongcu.model.ForgotPasswordRequest;
+import  com.example.cosmesticappcongcu.model.PasswordResetResponse;
+import  com.example.cosmesticappcongcu.model.ResetPasswordRequest;
+import  com.example.cosmesticappcongcu.retrofit.ApiService;
+import  com.example.cosmesticappcongcu.retrofit.RetrofitClient;
 
 public class ResetPasswordActivity extends AppCompatActivity {
     private EditText editTextOtp, editTextNewPassword, editTextConfirmPassword;

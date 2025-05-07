@@ -1,4 +1,4 @@
-package com.example.cosmesticappcongcu.activity;
+package  com.example.cosmesticappcongcu.activity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,18 +14,22 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import org.json.JSONObject;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import vn.phatbee.cosmesticshopapp.R;
-import vn.phatbee.cosmesticshopapp.model.RegistrationRequest;
-import vn.phatbee.cosmesticshopapp.model.RegistrationResponse;
-import vn.phatbee.cosmesticshopapp.retrofit.ApiService;
-import vn.phatbee.cosmesticshopapp.retrofit.RetrofitClient;
+import  com.example.cosmesticappcongcu.R;
+import  com.example.cosmesticappcongcu.model.RegistrationRequest;
+import  com.example.cosmesticappcongcu.model.RegistrationResponse;
+import  com.example.cosmesticappcongcu.retrofit.ApiService;
+import  com.example.cosmesticappcongcu.retrofit.RetrofitClient;
 
 public class RegisterActivity extends AppCompatActivity {
     private EditText editTextUsername, editTextEmail, editTextPassword, editTextConfirmPassword;
